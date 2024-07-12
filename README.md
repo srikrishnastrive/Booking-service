@@ -32,7 +32,7 @@ Lets take a look inside the `src` folder
     ```
     ex: 
     ```
-        PORT=3000
+        PORT=4000
     ```
  - go inside the `src` folder and execute the following command:
     ```
