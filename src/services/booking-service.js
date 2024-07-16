@@ -24,11 +24,18 @@ async function createBooking(data) {
     try {
         const uri = FLIGHT_SERVICE_URL + `/flights/${data.flightId}`;
         const flight = await axios.get(uri);
-        console.log(flight.data);
-        // const flightData = flight.data;
-        // console.log(flightData);
+        const flightData = flight.data.SuccessResponse.data;
+        console.log(flightData);
+        if(data.noofSeats > flightData.totalSeats){
+            throw new AppError("Not enough seats available",StatusCodes.BAD_REQUEST);
+        }
+        return true;
+        // console.log(flight.totalSeats);
+        // // const flightData = flight.data;
+        // // console.log(flightData);
     } catch (error) {
-        await transaction.rollback();
+        console.log(error);
+        //await transaction.rollback();
         throw error;
     }
 }
