@@ -24,10 +24,31 @@ async function createBooking(req, res) {
     }
 }
 
+async function makePayment(req, res) {
+    console.log(req.body);
+    try {
+        const response = await BookingService.makePayment({
+            bookingId: req.body.bookingId,
+            userId: req.body.userId,
+            totalCost : req.body.totalCost
+           
+        });
+        SuccessResponse.data = response;
+        return res
+                .status(StatusCodes.OK)
+                .json(SuccessResponse);
+    } catch(error) {
+        ErrorResponse.error = error;
+        return res
+                .status(StatusCodes.INTERNAL_SERVER_ERROR)
+                .json(ErrorResponse);
+    }
+}
 
 
 
 module.exports = {
     createBooking,
+    makePayment
     
 }
