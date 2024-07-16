@@ -23,11 +23,17 @@ async function createBooking(data) {
         const flight = await axios.get(uri);
         const flightData = flight.data.SuccessResponse.data;
         // console.log(flightData);
-        if(data.noofSeats > flightData.totalSeats){
+        if(data.noOfSeats > flightData.totalSeats){
             throw new AppError("Not enough seats available",StatusCodes.BAD_REQUEST);
         }
+        const totalBillingAmount = data.noOfSeats * flightData.price;
+        const bookingPayload = {...data,totalCost:totalBillingAmount};
+        const booking = await bookingRepository.create(bookingPayload,transaction);
+        const bookSeatsuri = FLIGHT_SERVICE_URL + `/flights/${data.flightId}/seats`;
+        await axios.patch(bookSeatsuri,{seats:data.noOfSeats});
+
         await transaction.commit();
-        return true;
+        return booking;
       
     } catch (error) {
         console.log(error);
