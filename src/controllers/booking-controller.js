@@ -5,11 +5,12 @@ const { SuccessResponse, ErrorResponse } = require('../utils/common');
 const inMemDb = {};
 
 async function createBooking(req, res) {
+    console.log(req.body);
     try {
         const response = await BookingService.createBooking({
             flightId: req.body.flightId,
-            userId: req.body.userId,
-            noofSeats: req.body.noofSeats
+            // userId: req.body.userId,
+            // noofSeats: req.body.noofSeats
         });
         SuccessResponse.data = response;
         return res
