@@ -5,6 +5,8 @@ const AppError = require('../utils/errors/app-error');
 const { Enums } = require('../utils/common');
 const { BOOKED, CANCELLED } = Enums.BOOKING_STATUS;
 const axios = require('axios');
+const { StatusCodes } = require('http-status-codes');
+
 
 const bookingRepository = new BookingRepository();
 
@@ -36,10 +38,11 @@ async function createBooking(data) {
 }
 
 async function makePayment(data) {
+    console.log(data);
     const transaction = await db.sequelize.transaction();
     try {
         const bookingDetails = await bookingRepository.get(data.bookingId, transaction);
-
+        console.log(bookingDetails);
         if (bookingDetails.status === CANCELLED) {
             throw new AppError('The booking has expired', StatusCodes.BAD_REQUEST);
         }
@@ -52,8 +55,11 @@ async function makePayment(data) {
             throw new AppError('The booking has expired', StatusCodes.BAD_REQUEST);
         }
 
-        if (bookingDetails.totalCost !== data.totalCost || bookingDetails.userId !== data.userId) {
-            throw new AppError('Payment details do not match', StatusCodes.BAD_REQUEST);
+        if(bookingDetails.totalCost != data.totalCost) {
+            throw new AppError('The amount of the payment doesnt match', StatusCodes.BAD_REQUEST);
+        }
+        if(bookingDetails.userId != data.userId) {
+            throw new AppError('The user corresponding to the booking doesnt match', StatusCodes.BAD_REQUEST);
         }
 
         await bookingRepository.update(data.bookingId, { status: BOOKED }, transaction);
@@ -91,6 +97,7 @@ async function cancelOldBookings() {
         return response;
     } catch (error) {
         console.log(error);
+        throw error;
     }
 }
 
