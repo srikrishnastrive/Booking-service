@@ -1,11 +1,13 @@
 const { BookingRepository } = require('../repositories');
-const { ServerConfig } = require('../config');
+const { ServerConfig, Queue } = require('../config');
 const db = require('../models');
 const AppError = require('../utils/errors/app-error');
 const { Enums } = require('../utils/common');
 const { BOOKED, CANCELLED } = Enums.BOOKING_STATUS;
 const axios = require('axios');
 const { StatusCodes } = require('http-status-codes');
+
+
 
 
 const bookingRepository = new BookingRepository();
@@ -30,6 +32,7 @@ async function createBooking(data) {
         await axios.patch(bookSeatsUri, { seats: data.noOfSeats });
 
         await transaction.commit();
+       
         return booking;
     } catch (error) {
         await transaction.rollback();
@@ -63,6 +66,12 @@ async function makePayment(data) {
         }
 
         await bookingRepository.update(data.bookingId, { status: BOOKED }, transaction);
+        Queue.sendData({
+            recepientEmail : 'msrikrishna2000@gmail.com',
+            subject : 'Flight booked',
+            text:`Booking successfully done for the flight ${bookingDetails.flightId}`,
+            
+        }); 
         await transaction.commit();
     } catch (error) {
         await transaction.rollback();
